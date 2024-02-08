@@ -9,7 +9,7 @@ venv
 utils
 retries_decorator.py
 db.sqlite3
-media/
+# media/
 locale/
 .pytest_cache
 
