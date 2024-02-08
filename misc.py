@@ -41,44 +41,44 @@ import secrets
 
 
 # import json
-from faker import Faker
+# from faker import Faker
 
-fake = Faker()
-
-
-def generate_fake_article():
-    return {
-        "model": "blog.Article",
-        "pk": str(secrets.randbelow(1000) + 1),
-        "fields": {
-            "title": fake.sentence(),
-            "author": 1,
-            "content": fake.paragraph(),
-            "image": "media/article_pics/default.png",
-            "publish": str(fake.date_time_this_decade(tzinfo=None).isoformat()),
-            "status": fake.random_element(elements=("draft", "published")),
-            "slug": fake.slug(),
-            # "tags": [fake.random_int(min=1, max=100) for _ in range(5)],
-            "category": random.choice([1, 2]),
-            "likes": [fake.random_int(min=1, max=100) for _ in range(5)],
-            "snippet": fake.sentence(),
-        },
-    }
+# fake = Faker()
 
 
-def generate_n_articles_json(n):
-    articles_json_data = [generate_fake_article() for _ in range(n)]
-    return articles_json_data
+# def generate_fake_article():
+#     return {
+#         "model": "blog.Article",
+#         "pk": str(secrets.randbelow(1000) + 1),
+#         "fields": {
+#             "title": fake.sentence(),
+#             "author": 1,
+#             "content": fake.paragraph(),
+#             "image": "media/article_pics/default.png",
+#             "publish": str(fake.date_time_this_decade(tzinfo=None).isoformat()),
+#             "status": fake.random_element(elements=("draft", "published")),
+#             "slug": fake.slug(),
+#             # "tags": [fake.random_int(min=1, max=100) for _ in range(5)],
+#             "category": random.choice([1, 2]),
+#             "likes": [fake.random_int(min=1, max=100) for _ in range(5)],
+#             "snippet": fake.sentence(),
+#         },
+#     }
 
 
-# Example usage to generate 5 articles
-n = 10
-articles_json_list = generate_n_articles_json(n)
-output_file_path = "article_data.json"
-with open(output_file_path, "w") as json_file:
-    json.dump(articles_json_list, json_file, indent=2)
+# def generate_n_articles_json(n):
+#     articles_json_data = [generate_fake_article() for _ in range(n)]
+#     return articles_json_data
 
-print(f"Generated articles saved to {output_file_path}")
+
+# # Example usage to generate 5 articles
+# n = 10
+# articles_json_list = generate_n_articles_json(n)
+# output_file_path = "article_data.json"
+# with open(output_file_path, "w") as json_file:
+#     json.dump(articles_json_list, json_file, indent=2)
+
+# print(f"Generated articles saved to {output_file_path}")
 
 
 # import json
@@ -167,3 +167,22 @@ with open(output_file_path, "w") as json_file:
 
 print(f"Generated users saved to {output_file_path}")
  """
+
+import secrets
+import base64
+
+
+def generate_url_safe_string(length):
+    # Generate a random byte string using secrets
+    random_bytes = secrets.token_bytes(length)
+
+    # Encode the byte string using base64
+    base64_encoded = base64.urlsafe_b64encode(random_bytes)
+
+    # Convert the bytes to a string and remove padding
+    url_safe_string = base64_encoded.decode("utf-8").rstrip("=")
+
+    return url_safe_string
+
+
+print(generate_url_safe_string(40))
