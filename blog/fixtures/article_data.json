@@ -1,0 +1,34 @@
+[
+  {
+    "model": "blog.Article",
+    "pk": 1,
+    "fields": {
+      "title": "Create building heavy year.",
+      "author": 1,
+      "content": "City task front natural scientist project unit. Space community nation Democrat. Tax clear pay anyone at.",
+      "image": "images/default.png",
+      "publish": "2020-04-09 08:45:11.269818",
+      "status": "published",
+      "slug": "short-authority",
+      "category": 1,
+      "likes": [],
+      "snippet": "Picture after notice month institution number."
+    }
+  },
+  {
+    "model": "blog.Article",
+    "pk": 2,
+    "fields": {
+      "title": "Job pick you nothing.",
+      "author": 1,
+      "content": "Edge explain language strong edge over much town. Change defense read lose class. Food wide ten word include control else model.",
+      "image": "images/default.png",
+      "publish": "2020-09-10 12:34:43.953892",
+      "status": "draft",
+      "slug": "art-summer-ability",
+      "category": 1,
+      "likes": [],
+      "snippet": "General contain side production improve."
+    }
+  }
+]

@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block content %}
+
+{% if hits %}
+<ul>
+    {% for hit in hits %}
+    <li><a href="{{ hit.url }}">{{ hit.title }}</a></li>
+    {% endfor %}
+</ul>
+{% endif %}
+  
+{% endblock  %}

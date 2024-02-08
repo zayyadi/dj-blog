@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block title %}
+    {{ article.title }}
+{% endblock %}
+
+{% block content %}
+
+    <div class="font-sans bg-gray-600">
+
+        <!-- Main Content -->
+        <div class="flex container bg-gray-600 mx-auto mt-8">
+
+            <!-- Article Section -->
+            <section class="flex-1 max-w-3xl mx-auto bg-gray-600 p-8 rounded-lg shadow-md">
+                <h1 class="text-3xl font-bold mb-4">{{ article.title }}</h1>
+                <p class="text-gray-200">Published on {{ article.publish.date }}</p>
+                <img src="{{ article.image.url }}" alt="{{ article.title }}" class="mt-4 mb-8 w-full rounded-lg">
+                <p class="text-gray-100">{{ article.content|safe }}</p>
+                <form action="{% url 'blog:article_like' article.slug %}" method="POST">
+                    {% csrf_token %}
+                    <button type="submit" name="article_slug" value="{{ article.slug }}" class="btn btn-primary btn-sm">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor"
+                            class="bi bi-heart" viewBox="0 0 16 16">
+                            <path
+                                d="m8 2.748-.717-.737C5.6.281 2.514.878 1.4 3.053c-.523 1.023-.641 2.5.314 4.385.92 1.815 2.834 3.989 6.286 6.357 3.452-2.368 5.365-4.542 6.286-6.357.955-1.886.838-3.362.314-4.385C13.486.878 10.4.28 8.717 2.01L8 2.748zM8 15C-7.333 4.868 3.279-3.04 7.824 1.143c.06.055.119.112.176.171a3.12 3.12 0 0 1 .176-.17C12.72-3.042 23.333 4.867 8 15z" />
+                        </svg>
+                        {{ article.total_likes }}
+                    </button>
+                </form>
+            </section>
+
+            <!-- Similar Posts Section -->
+            <aside class="flex-shrink-0 w-1/4 bg-gray-600 p-4 rounded-lg shadow-md">
+                <h2 class="text-2xl font-bold mb-4">Similar Posts</h2>
+                <ul>
+                    {% for similar in similar_posts %}
+                    <li><a href="{{ similar.get_absolute_url }}"
+                            class="text-blue-500 hover:underline">{{ similar.snippet|truncatechars:50 }}</a></li>
+                    {% endfor %}
+                </ul>
+            </aside>
+        </div>
+
+        <!-- Comments Section -->
+        <section class="flex-1 max-w-3xl mx-auto bg-gray-600 p-8 rounded-lg shadow-md">
+            <div class="mt-8">
+                <form method="post" action="{{ post.get_absolute_url }}">
+                    {% csrf_token %}
+                    {{ comment_form.as_p }}
+                    <button type="submit"
+                        class="bg-blue-500 text-white mt-8 items-center px-4 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring focus:ring-blue-200 transition-all">Add
+                        Comment</button>
+                </form>
+            </div>
+        
+            <div class="mt-8">
+                {% if comment %}
+                <h2 class="text-2xl font-semibold mb-4">Comments</h2>
+                <ul>
+                    {% for comments in comment %}
+                    <li class="mb-4">
+                        <div class="flex items-center mb-2">
+                            <span class="font-semibold text-gray-800">{{ comments.user.first_name }}</span>
+                            <span class="text-gray-500 ml-2">{{ comments.created_at }}</span>
+                        </div>
+                        <p>{{ comments.body }}</p>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <p class="text-gray-500">No comments yet. Be the first to comment!</p>
+                {% endif %}
+            </div>
+        </section>
+    </div>
+
+{% endblock %}

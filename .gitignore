@@ -1,0 +1,16 @@
+.env
+/__pycache__
+__pycache__/
+/__pycache__/
+.pyc
+test_suite_analysis
+theme
+venv
+.vscode
+utils
+retries_decorator.py
+db.sqlite3
+media/
+locale/
+.pytest_cache
+
