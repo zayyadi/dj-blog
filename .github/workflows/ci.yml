@@ -56,7 +56,7 @@ jobs:
           mkdir -p ~/.ssh
           install -m 600 -D /dev/null ~/.ssh/id_rsa
           ssh-agent -a $SSH_AUTH_SOCK > /dev/null
-          ssh-copy-id ${{ secrets.SSH_KEY }} zayyadev@zayadev.xyz
+          ssh-copy-id "${{ secrets.SSH_KEY }}" zayyadev@zayadev.xyz
           echo "${{ secrets.PRIVATE_KEY }}" > ~/.ssh/id_rsa
 
       - name: Build and Deploy
