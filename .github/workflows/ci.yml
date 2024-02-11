@@ -65,8 +65,8 @@ jobs:
         env:
           SSH_AUTH_SOCK: /tmp/ssh_agent.sock
         run: |
-          scp  -o StrictHostKeyChecking=no -r ./.env zayyadev@zayadev.xyz:/opt/usr/devs/
-          ssh -o StrictHostKeyChecking=no zayyadev@zayadev.xyz << 'ENDSSH'
+          scp  -o StrictHostKeyChecking=no -r ./.env zayyadev@${{ secrets.VPS_IP_ADDRESS }}:/opt/usr/devs/
+          ssh -o StrictHostKeyChecking=no zayyadev@${{ secrets.VPS_IP_ADDRESS }} << 'ENDSSH'
             cd /opt/usr/devs/
             git pull origin master --force
             cd dj_user
