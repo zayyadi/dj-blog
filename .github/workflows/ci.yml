@@ -56,8 +56,9 @@ jobs:
           mkdir -p ~/.ssh
           ssh-agent -a $SSH_AUTH_SOCK > /dev/null
           ssh-keyscan github.com > ~/.ssh/known_hosts
-          echo "${{ secrets.PRIVATE_KEY }}" > ~/.ssh/id_rsa
           sudo chmod 600 ~/.ssh/id_rsa
+          echo "${{ secrets.PRIVATE_KEY }}" > ~/.ssh/id_rsa
+
       - name: Build and Deploy
         env:
           SSH_AUTH_SOCK: /tmp/ssh_agent.sock
