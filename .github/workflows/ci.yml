@@ -49,15 +49,30 @@ jobs:
           echo POSTGRES_DB=${{ secrets.DATABASE_NAME }} >> .env
           echo POSTGRES_USER=${{ secrets.DATABASE_USER }} >> .env
           echo POSTGRES_PASSWORD=${{ secrets.DATABASE_PASSWORD }} >> .env
-      - name: ssh-agent
+      - name: ssh deploy on aws ec2
+        uses: actions/checkout@v1
         env:
-          SSH_AUTH_SOCK: /tmp/ssh_agent.sock
+          SSH_PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
+          REMOTE_HOST: ${{ secrets.VPS_IP_ADDRESS }}
+          REMOTE_USER: ${{ secrets.USER }}
+          REMOTE_PORT: ${{ secrets.PORT }}
+          SOURCE: "./"
+      - name: ssh-agent
         run: |
-          mkdir -p ~/.ssh
-          install -m 600 -D /dev/null ~/.ssh/id_rsa
-          ssh-agent -a $SSH_AUTH_SOCK > /dev/null
-          ssh-copy-id -i "${{ secrets.SSH_KEY }}" zayyadev@zayadev.xyz
-          echo "${{ secrets.PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          mkdir -p ~/.ssh/
+          echo "$SSH_KEY" > ~/.ssh/staging.key
+          chmod 600 ~/.ssh/staging.key
+          cat >>~/.ssh/config <<END
+          Host staging
+            HostName $SSH_HOST
+            User $SSH_USER
+            IdentityFile ~/.ssh/staging.key
+            StrictHostKeyChecking no
+          END
+        env:
+          SSH_USER: ${{ secrets.USER }}
+          SSH_KEY: ${{ secrets.SSH_KEY }}
+          SSH_HOST: ${{ secrets.VPS_IP_ADDRESS }}
 
       - name: Build and Deploy
         env:
