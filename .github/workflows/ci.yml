@@ -56,9 +56,10 @@ jobs:
           mkdir -p ~/.ssh
           install -m 600 -D /dev/null ~/.ssh/id_rsa
           ssh-agent -a $SSH_AUTH_SOCK > /dev/null
-          ssh-keyscan github.com > ~/.ssh/known_hosts
-          sudo chmod 600 ~/.ssh/id_rsa
           echo "${{ secrets.PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          host='zayyadev.xyz'
+          hosts="$(dig +short "$host" | grep -v '\.$' | sed -z 's|\n|,|g')$host"
+          ssh-keyscan -H "$hosts" > ~/.ssh/known_hosts
 
       - name: Build and Deploy
         env:
