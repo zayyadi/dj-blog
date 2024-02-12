@@ -52,13 +52,13 @@ jobs:
       - name: SSH deploy on AWS EC2
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.VPS_IP_ADDRESS }}
+          host: ${{ vars.VPS_HOST }}
           username: ${{ secrets.USER }}
           key: ${{ secrets.PRIVATE_KEY }}
           port: ${{ secrets.PORT }}
           script: |
-            scp -o StrictHostKeyChecking=no -r ./.env ${{ secrets.USER }}@${{ secrets.VPS_IP_ADDRESS }}:/opt/usr/devs/
-            ssh -o StrictHostKeyChecking=no ${{ secrets.USER }}@${{ secrets.VPS_IP_ADDRESS }} << 'ENDSSH'
+            scp -o StrictHostKeyChecking=no -r ./.env ${{ secrets.USER }}@${{ vars.VPS_HOST }}:/opt/usr/devs/
+            ssh -o StrictHostKeyChecking=no ${{ secrets.USER }}@${{ vars.VPS_HOST }} << 'ENDSSH'
               cd /opt/usr/devs/
               git pull origin master --force
               cd dj_user
