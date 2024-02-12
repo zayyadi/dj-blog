@@ -49,51 +49,28 @@ jobs:
           echo POSTGRES_DB=${{ secrets.DATABASE_NAME }} >> .env
           echo POSTGRES_USER=${{ secrets.DATABASE_USER }} >> .env
           echo POSTGRES_PASSWORD=${{ secrets.DATABASE_PASSWORD }} >> .env
-      - name: ssh deploy on aws ec2
-        uses: actions/checkout@v1
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.PRIVATE_KEY }}
-          REMOTE_HOST: ${{ secrets.VPS_IP_ADDRESS }}
-          REMOTE_USER: ${{ secrets.USER }}
-          REMOTE_PORT: ${{ secrets.PORT }}
-          SOURCE: "./"
-      - name: ssh-agent
-        run: |
-          mkdir -p ~/.ssh/
-          echo "$SSH_KEY" > ~/.ssh/staging.key
-          chmod 600 ~/.ssh/staging.key
-          cat >>~/.ssh/config <<END
-          Host staging
-            HostName $SSH_HOST
-            User $SSH_USER
-            IdentityFile ~/.ssh/staging.key
-            StrictHostKeyChecking no
-          END
-        env:
-          SSH_USER: ${{ secrets.USER }}
-          SSH_KEY: ${{ secrets.SSH_KEY }}
-          SSH_HOST: ${{ secrets.VPS_IP_ADDRESS }}
-
-      - name: Build and Deploy
-        env:
-          SSH_USER: ${{ secrets.USER }}
-          SSH_KEY: ${{ secrets.SSH_KEY }}
-          SSH_HOST: ${{ secrets.VPS_IP_ADDRESS }}
-        run: |
-          scp  -o StrictHostKeyChecking=no -r ./.env zayyadev@zayadev.xyz:/opt/usr/devs/
-          ssh -o StrictHostKeyChecking=no zayyadev@zayadev.xyz << 'ENDSSH'
-            cd /opt/usr/devs/
-            git pull origin master --force
-            cd dj_user
-            python3.11 -m pip install virtualenv
-            python3.11 -m virtualenv venv
-            source ./venv/bin/activate
-            pip install --upgrade pip
-            pip install wheel
-            pip install -r requirements.txt
-            bash ./build/migrations.sh
-            chmod +x ./deploy/start_gunicorn
-            chmod u+x ./terminate.sh
-            sudo service supervisor restart
-            sudo nginx -t && sudo service nginx reload
-          ENDSSH
+      - name: SSH deploy on AWS EC2
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.VPS_IP_ADDRESS }}
+          username: ${{ secrets.USER }}
+          key: ${{ secrets.PRIVATE_KEY }}
+          port: ${{ secrets.PORT }}
+          script: |
+            scp -o StrictHostKeyChecking=no -r ./.env ${{ secrets.USER }}@${{ secrets.VPS_IP_ADDRESS }}:/opt/usr/devs/
+            ssh -o StrictHostKeyChecking=no ${{ secrets.USER }}@${{ secrets.VPS_IP_ADDRESS }} << 'ENDSSH'
+              cd /opt/usr/devs/
+              git pull origin master --force
+              cd dj_user
+              python3.11 -m pip install virtualenv
+              python3.11 -m virtualenv venv
+              source ./venv/bin/activate
+              pip install --upgrade pip
+              pip install wheel
+              pip install -r requirements.txt
+              bash ./build/migrations.sh
+              chmod +x ./deploy/start_gunicorn
+              chmod u+x ./terminate.sh
+              sudo service supervisor restart
+              sudo nginx -t && sudo service nginx reload
+            ENDSSH
