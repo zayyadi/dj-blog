@@ -4,12 +4,16 @@ from django.contrib.auth.decorators import login_required
 # from users.models import NewUser
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.db.models import Count
-from django.shortcuts import HttpResponseRedirect, get_object_or_404, redirect, render
+from django.shortcuts import (
+    get_object_or_404,
+    redirect,
+    render,
+)  # noqa: F401
 from django.template.defaultfilters import slugify
 from taggit.models import Tag
 
 from blog.search import search
-from .models import Article, Category, Comment
+from .models import Article, Category
 
 from .forms import ArticleForm, CommentForm, CategoryForm
 

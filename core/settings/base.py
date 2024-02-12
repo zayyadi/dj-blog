@@ -4,7 +4,7 @@ from django.utils.translation import gettext_lazy as _
 
 load_dotenv("./.env")
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 
 # Quick-start development settings - unsuitable for production
@@ -70,7 +70,7 @@ MIDDLEWARE = [
 SESSION_ENGINE = "django.contrib.sessions.backends.db"
 
 # Set a reasonable session cookie age (e.g., 1209600 seconds for 2 weeks)
-SESSION_COOKIE_AGE = os.getenv("COOKIE_AGE")
+SESSION_COOKIE_AGE = int(os.getenv("COOKIE_AGE"))
 
 
 ROOT_URLCONF = "core.urls"

@@ -1,4 +1,4 @@
-import json
+# import json
 import random
 import string
 
@@ -40,45 +40,45 @@ import secrets
 # print("JSON data has been generated and saved to 'generated_data.json'.")
 
 
-# import json
-# from faker import Faker
+import json
+from faker import Faker
 
-# fake = Faker()
-
-
-# def generate_fake_article():
-#     return {
-#         "model": "blog.Article",
-#         "pk": str(secrets.randbelow(1000) + 1),
-#         "fields": {
-#             "title": fake.sentence(),
-#             "author": 1,
-#             "content": fake.paragraph(),
-#             "image": "media/article_pics/default.png",
-#             "publish": str(fake.date_time_this_decade(tzinfo=None).isoformat()),
-#             "status": fake.random_element(elements=("draft", "published")),
-#             "slug": fake.slug(),
-#             # "tags": [fake.random_int(min=1, max=100) for _ in range(5)],
-#             "category": random.choice([1, 2]),
-#             "likes": [fake.random_int(min=1, max=100) for _ in range(5)],
-#             "snippet": fake.sentence(),
-#         },
-#     }
+fake = Faker()
 
 
-# def generate_n_articles_json(n):
-#     articles_json_data = [generate_fake_article() for _ in range(n)]
-#     return articles_json_data
+def generate_fake_article():
+    return {
+        "model": "blog.Article",
+        "pk": str(secrets.randbelow(1000) + 1),
+        "fields": {
+            "title": fake.sentence(),
+            "author": 5,
+            "content": fake.paragraph(),
+            "image": "media/article_pics/default.png",
+            "publish": str(fake.date_time_this_decade(tzinfo=None).isoformat()),
+            "status": fake.random_element(elements=("draft", "published")),
+            "slug": fake.slug(),
+            # "tags": [fake.random_int(min=1, max=100) for _ in range(5)],
+            "category": random.choice([1, 2]),
+            "likes": [],
+            "snippet": fake.sentence(),
+        },
+    }
 
 
-# # Example usage to generate 5 articles
-# n = 10
-# articles_json_list = generate_n_articles_json(n)
-# output_file_path = "article_data.json"
-# with open(output_file_path, "w") as json_file:
-#     json.dump(articles_json_list, json_file, indent=2)
+def generate_n_articles_json(n):
+    articles_json_data = [generate_fake_article() for _ in range(n)]
+    return articles_json_data
 
-# print(f"Generated articles saved to {output_file_path}")
+
+# Example usage to generate 5 articles
+n = 10
+articles_json_list = generate_n_articles_json(n)
+output_file_path = "article_data.json"
+with open(output_file_path, "w") as json_file:
+    json.dump(articles_json_list, json_file, indent=2)
+
+print(f"Generated articles saved to {output_file_path}")
 
 
 # import json
