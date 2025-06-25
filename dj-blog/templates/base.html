@@ -1,0 +1,96 @@
+{% load static %}
+{% load i18n %}
+
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>{% block page_title %}{% endblock page_title %}{% if not self.page_title %}My Awesome Blog{% endif %}</title>
+    <meta name="description" content="{% block meta_description %}Welcome to My Awesome Blog - a beautifully designed space for interesting articles and posts.{% endblock meta_description %}">
+    <meta name="keywords" content="{% block meta_keywords %}blog, articles, django, python, tech, design{% endblock meta_keywords %}">
+
+    <!-- Modern Tailwind CSS v3 via Play CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.tailwindcss.com?plugins=typography"></script>
+
+    <!-- Google Fonts: Poppins -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script>
+        // Customizations for Tailwind CSS
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        // Sets 'Poppins' as the default sans-serif font
+                        sans: ['Poppins', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // --- Mobile Menu Toggle ---
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            if (mobileMenuButton && mobileMenu) {
+                mobileMenuButton.addEventListener('click', function () {
+                    mobileMenu.classList.toggle('hidden');
+                });
+            }
+
+            // --- NEW: User Profile Dropdown Toggle ---
+            const userMenuButton = document.getElementById('user-menu-button');
+            const userMenu = document.getElementById('user-menu');
+
+            if (userMenuButton && userMenu) {
+                userMenuButton.addEventListener('click', function (event) {
+                    event.stopPropagation(); // Prevent click from bubbling up to the window
+                    userMenu.classList.toggle('hidden');
+                });
+
+                // Hide dropdown if clicked outside
+                window.addEventListener('click', function (event) {
+                    if (!userMenu.classList.contains('hidden') && !userMenuButton.contains(event.target)) {
+                        userMenu.classList.add('hidden');
+                    }
+                });
+            }
+        });
+    </script>
+    
+    {% block extra_head %}{% endblock extra_head %}
+    {% include "script.html" %}
+
+</head>
+<body class="bg-slate-50 font-sans text-slate-800 flex flex-col min-h-screen">
+    
+    {% include "navbar.html" %}
+
+    <main class="flex-grow">
+        {% block content %}{% endblock content %}
+    </main>
+    
+    {% include "footer.html" %}
+
+    <!-- Simple JS for Mobile Menu Toggle -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const menuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            if (menuButton && mobileMenu) {
+                menuButton.addEventListener('click', function () {
+                    mobileMenu.classList.toggle('hidden');
+                });
+            }
+        });
+    </script>
+</body>
+</html>

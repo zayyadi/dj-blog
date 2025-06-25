@@ -1,0 +1,154 @@
+<body class="font-sans bg-gray-100">
+
+    <!-- Navigation -->
+    <nav class="bg-blue-500 p-4 text-white">
+        <div class="container mx-auto">
+            <a href="#" class="text-2xl font-bold">Your Blog</a>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="flex container mx-auto mt-8">
+
+        <!-- Article Section -->
+        <section class="flex-1 max-w-3xl mx-auto bg-white p-8 rounded-lg shadow-md">
+            <h1 class="text-3xl font-bold mb-4">Article Title</h1>
+            <p class="text-gray-600">Published on January 23, 2024</p>
+            <img src="{{article.image.url}}" alt="{{article.title}}" class="mt-4 mb-8 w-full rounded-lg">
+            <p class="text-gray-800">{{article.content|safe}}</p>
+            <form action="{% url 'blog:article_like' article.slug %}" method="POST">
+                {% csrf_token %}
+                <button type="submit" name="article_slug", value="{{ article.slug }}", class="btn btn-primary btn-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-heart" viewBox="0 0 16 16">
+                  <path d="m8 2.748-.717-.737C5.6.281 2.514.878 1.4 3.053c-.523 1.023-.641 2.5.314 4.385.92 1.815 2.834 3.989 6.286 6.357 3.452-2.368 5.365-4.542 6.286-6.357.955-1.886.838-3.362.314-4.385C13.486.878 10.4.28 8.717 2.01L8 2.748zM8 15C-7.333 4.868 3.279-3.04 7.824 1.143c.06.055.119.112.176.171a3.12 3.12 0 0 1 .176-.17C12.72-3.042 23.333 4.867 8 15z"/>
+                </svg>
+                {{ article.total_likes }}
+                </button>
+            </form>
+
+        </section>
+
+        
+
+        <!-- Similar Posts Section -->
+        <aside class="flex-shrink-0 w-1/4 bg-gray-200 p-4 rounded-lg shadow-md">
+            <h2 class="text-2xl font-bold mb-4">Similar Posts</h2>
+            {% for similar in similar_posts  %}
+            <ul>
+                <li><a href="{{similar.get_absolute_url}}" class="text-blue-500 hover:underline">{{similar.snippet|truncatechars:50}}</a></li>
+                <!-- Add more links based on your data -->
+            </ul>
+            {% endfor %}
+        </aside>
+    </div>
+
+    <!-- Comments Section -->
+    <section class="container mx-auto mt-8">
+        <div class="max-w-3xl mx-auto bg-white p-8 rounded-lg shadow-md">
+            {% with allcomments.count as total_comments  %}
+              
+            <h2 class="text-2xl font-bold mb-4">{{ total_comments }} Comments{{ total_comments|pluralize }}</h2>
+            {% endwith %}
+            <!-- Single Comment -->
+            {% load mptt_tags %}
+
+            {% recursetree comments %}
+            <div id="{{ node.id }}" class="flex items-center mb-4">
+                <img src="https://via.placeholder.com/40" alt="User Avatar" class="rounded-full mr-4">
+                <div>
+                    <figure class="tm-comment-figure">
+                        <figcaption class="tm-color-primary text-center">By {{ node.name }}</figcaption>
+                    </figure>
+                    <p class="text-gray-600">{{ node.body }}</p>
+                </div>
+                <div class="flex justify-between">
+                    {% if node.level < 3 %}
+                        <button onclick="myFunction({{ node.id }})" class="text-blue-500 hover:underline">REPLY</button>
+                        <span class="text-blue-500">{{ "June 14, 2020" }}</span>
+                    {% endif %}
+                </div>
+                
+            </div>
+            <!-- Another Comment -->
+            <div class="flex items-center mb-4">
+                <img src="https://via.placeholder.com/40" alt="User Avatar" class="rounded-full mr-4">
+                <div>
+                    <p class="text-gray-800 font-semibold">Jane Doe</p>
+                    <p class="text-gray-600">Integer nec odio. Praesent libero. Sed cursus ante dapibus diam.</p>
+                </div>
+            </div>
+            <div class="children pl-2 md:pl-5">
+                {% if not node.is_leaf_node %}
+                    {{ children }}
+                {% endif %}
+                {% endrecursetree %}
+            </div>
+              <br>
+        </div>
+        <div id="myForm">
+            <form action="#" method="post">
+
+                <!-- Name Field -->
+                <div class="mb-4">
+                    <label for="name" class="block text-sm font-medium text-gray-600">Name</label>
+                    <input type="text" id="id_name" name="name" class="mt-1 p-2 w-full border rounded-md focus:outline-none focus:border-blue-500">
+                </div>
+    
+                <!-- Email Field -->
+                <div class="mb-4">
+                    <label for="email" class="block text-sm font-medium text-gray-600">Email</label>
+                    <input type="email" id="id_email" name="email" class="mt-1 p-2 w-full border rounded-md focus:outline-none focus:border-blue-500">
+                </div>
+    
+                <!-- Body Field -->
+                <div class="mb-6">
+                    <label for="body" class="block text-sm font-medium text-gray-600">Comment</label>
+                    <textarea id="id_body" name="body" rows="4" class="mt-1 p-2 w-full border rounded-md focus:outline-none focus:border-blue-500"></textarea>
+                </div>
+    
+                <!-- Submit Button -->
+                <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">Submit Comment</button>
+    
+            </form>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-200 p-4 text-center mt-8">
+        <p class="text-gray-600">&copy; 2024 Your Blog. All rights reserved.</p>
+    </footer>
+
+</body>
+
+<script>
+    function formExit() {
+      document.getElementById("newForm").remove();
+    }
+  
+    function myFunction(id) {
+      if (document.contains(document.getElementById("newForm"))) {
+        document.getElementById("newForm").remove();
+      }
+  
+      var d1 = document.getElementById(id);
+      d1.insertAdjacentHTML('afterend',
+        '<form id="newForm" class="form-insert py-2" method="post"> \
+                  <div class="d-flex justify-content-between"><h2>Reply:</h2><div><button type="button" class="btn btn-outline-secondary" onclick="formExit()"">Close</button></div></div> \
+                  <label for="id_name">Name:</label> \
+                  <input type="text" name="name" class="col-sm-12" maxlength="50" required="" id="id_name">\
+                  <select name="parent" class="d-none" id="id_parentt"> \
+                  <option value="' + id + '" selected="' + id + '"></option> \
+                  </select> \
+                  <label for="id_email">Email:</label> \
+                  <input type="text" name="email" class="col-sm-12" maxlength="254" required="" id="id_email"> \
+                  <label for="id_content">Content:</label> \
+                  <textarea name="content" cols="40" rows="5" class="form-control" required id="id_content"></textarea> \
+                  {% csrf_token %} \
+                  <button type="submit" class="btn btn-primary btn-lg btn-block">Submit</button> \
+                </form>');
+  
+      //document.querySelector('#id_parentt [value="' + id + '"]').selected = true;
+    }
+  
+    $('#myForm').trigger("reset");
+  </script>

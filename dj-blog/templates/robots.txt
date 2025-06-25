@@ -1,0 +1,10 @@
+User-agent: *
+Disallow: /admin/
+Disallow: /users/
+Disallow: /oauth/
+Disallow: /media/ # If you don't want media files directly indexed
+Disallow: /static/ # Usually not necessary to crawl static assets directly for content
+
+Allow: / # Allow everything else not disallowed
+
+Sitemap: /sitemap.xml

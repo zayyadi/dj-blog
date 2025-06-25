@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block page_title %}
+  Blog Articles - My Awesome Blog
+{% endblock page_title %}
+
+{% block meta_description %}
+  Read the latest articles on technology, design, and more from My Awesome Blog.
+{% endblock meta_description %}
+
+{% block meta_keywords %}
+  blog, articles, latest posts, technology, programming, design
+{% endblock meta_keywords %}
+
+{% block content %}
+<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+  
+  <!-- Page Header/Hero Section -->
+  <div class="py-16 text-center">
+    <h1 class="text-4xl font-bold tracking-tight text-slate-900 sm:text-5xl lg:text-6xl">
+      From the Blog
+    </h1>
+    <p class="mt-4 max-w-2xl mx-auto text-lg text-slate-600">
+      Insights, tutorials, and stories from our team. Welcome to our corner of the internet.
+    </p>
+  </div>
+
+  <!-- Blog Posts Grid -->
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 pb-16">
+    {% for post in articles %}
+    <!-- Blog Post Card -->
+    <a href="{{ post.get_absolute_url }}" class="group block rounded-xl overflow-hidden transform transition-all duration-300 hover:-translate-y-1 hover:shadow-2xl">
+      <div class="bg-white shadow-md h-full flex flex-col">
+        <!-- Image Container with fixed aspect ratio -->
+        <div class="relative w-full aspect-w-16 aspect-h-9">
+          <img src="{{ post.image.url }}" alt="{{ post.title }}" class="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105">
+        </div>
+        
+        <!-- Card Content -->
+        <div class="p-6 flex-grow flex flex-col">
+          <!-- Tags -->
+          <div class="mb-3">
+            {% for tag in post.tags.all|slice:":2" %} {# Show max 2 tags for cleanliness #}
+              <span class="inline-block bg-sky-100 text-sky-800 text-xs font-semibold px-2.5 py-1 rounded-full mr-1">
+                {{ tag.name }}
+              </span>
+            {% endfor %}
+          </div>
+          
+          <!-- Title -->
+          <h2 class="text-xl font-bold text-slate-800 mb-2 group-hover:text-sky-600 transition-colors duration-300">
+            {{ post.title }}
+          </h2>
+          
+          <!-- Snippet -->
+          <p class="text-slate-600 text-sm leading-relaxed flex-grow">
+            {{ post.snippet|truncatechars:120 }}
+          </p>
+          
+          <!-- Author and Date -->
+          <div class="mt-6 pt-4 border-t border-slate-200 flex items-center">
+            <!-- You can replace this with the author's actual avatar -->
+            <div class="flex-shrink-0">
+                <!-- FIXED LINE 1: Using get_username() for the avatar API and alt text -->
+                <img class="h-10 w-10 rounded-full" src="https://ui-avatars.com/api/?name={{ post.author.get_username|slice:':1' }}&background=random" alt="{{ post.author.get_username }}">
+            </div>
+            <div class="ml-3">
+              <!-- FIXED LINE 2: Using get_username() as the fallback for the full name -->
+              <p class="text-sm font-medium text-slate-900">{{ post.author.get_full_name|default:post.author.get_username }}</p>
+              <div class="flex space-x-1 text-xs text-slate-500">
+                <time datetime="{{ post.publish|date:'Y-m-d' }}">{{ post.publish.date }}</time>
+                <span aria-hidden="true">·</span>
+                <span>{{ post.total_likes }} {% trans "likes" %}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </a>
+    {% empty %}
+      <p class="col-span-full text-center text-slate-500 py-12">{% trans "No articles found." %}</p>
+    {% endfor %}
+  </div>
+
+  <!-- Pagination -->
+  <div class="py-8">
+    {% if articles.has_other_pages %}
+      {% include 'blog/pagination.html' with page=articles %}
+    {% endif %}
+  </div>
+
+</div>
+{% endblock %}

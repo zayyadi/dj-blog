@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block page_title %}
+    {% if category %}{{ category.name }} Category{% else %}Articles{% endif %} - My Blog
+{% endblock page_title %}
+
+{% block meta_description %}
+    Browse articles in the {{ category.name|default:"general" }} category on My Blog.
+{% endblock meta_description %}
+
+{% block meta_keywords %}
+    blog, articles, {{ category.name|default:"posts" }}, category
+{% endblock meta_keywords %}
+
+{% block content %}
+
+
+<main>
+  <div class="album py-5 bg-light">
+    <div class="container">
+
+      <div class="pb-3 h5">{{category.name|title}}</div>
+      <div class="row row-cols-1 row-cols-sm-2 row-cols-md-5 g-3">
+
+        {% for post in article %}
+
+        <div class="col">
+          <div class="card shadow-sm">
+          <img class="img-fluid" alt="Responsive image" src="{{ post.image.url }}">
+
+            <div class="card-body">
+              <p class="card-text">
+                <a class="text-dark text-decoration-none" href="{{ post.get_absolute_url }}">{{ post.title }}</a>
+              </p>
+              <div class="d-flex justify-content-between align-items-center">
+                <small class="text-muted">9min read</small>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {% endfor %}
+
+      </div>
+    </div>
+  </div>
+
+
+</main>
+
+{% endblock %}

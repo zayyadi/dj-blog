@@ -1,0 +1,42 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+.env
+static/
+staticfiles/
+media/
+theme/
+.venv/
+
+.env
+/__pycache__
+__pycache__/
+/__pycache__/
+.pyc
+test_suite_analysis
+venv
+.vscode
+utils
+retries_decorator.py
+db.sqlite3
+# media/
+locale/
+.pytest_cache
+
+static/
+staticfiles/
+media/
+theme/
+.venv/
+*.log
+migrations/
+*.sqlite3
+*.db
+.ini

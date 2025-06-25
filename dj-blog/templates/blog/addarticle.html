@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load crispy_forms_tags %}
+
+{% block page_title %}{% trans "Create a New Article" %}{% endblock %}
+
+{% block content %}
+{% if user.is_authenticated %}
+<div class="mx-auto max-w-3xl px-4 py-8 sm:py-12 lg:px-8">
+    
+    <!-- Page Header -->
+    <div class="text-center">
+        <h1 class="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">
+            {% trans "Create a New Article" %}
+        </h1>
+        <p class="mt-3 text-lg text-slate-600">
+            {% trans "Share your knowledge and stories with the world." %}
+        </p>
+    </div>
+
+    <!-- Form Container -->
+    <div class="mt-10 bg-white rounded-xl shadow-md p-6 sm:p-8">
+        <form method="post" enctype="multipart/form-data" class="space-y-6">
+            {% csrf_token %}
+            
+            <!-- This is needed for rich text editors like TinyMCE -->
+            {{ form.media }}
+            
+            <!-- Let Crispy Forms do the heavy lifting -->
+            {{ form|crispy }}
+            
+            <!-- Submit Button -->
+            <div class="pt-4 border-t border-slate-200">
+                <button type="submit" class="inline-flex justify-center rounded-md border border-transparent bg-sky-600 px-6 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2 transition-colors">
+                    {% trans "Publish Article" %}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% else %}
+    <!-- Professional Access Denied Message -->
+    <div class="mx-auto max-w-xl text-center py-16 px-4">
+        <h2 class="text-2xl font-bold text-slate-800">{% trans "Access Denied" %}</h2>
+        <p class="mt-2 text-slate-600">{% trans "You must be logged in to create an article." %}</p>
+        <div class="mt-6">
+            {# Make sure this URL name matches your login URL #}
+            <a href="{% url 'users:login' %}" class="inline-block rounded-md bg-sky-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-sky-700 transition-colors">
+                {% trans "Log In" %}
+            </a>
+        </div>
+    </div>
+{% endif %}
+{% endblock content %}

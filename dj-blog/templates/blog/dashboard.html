@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block page_title %}{% trans "Dashboard" %}{% endblock %}
+
+{% block content %}
+{% if user.is_authenticated %}
+<div class="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+
+    <!-- Page Header -->
+    <header class="flex flex-col sm:flex-row items-center justify-between gap-4 pb-8 border-b border-slate-200">
+        <div>
+            <h1 class="text-3xl font-bold tracking-tight text-slate-900">
+                {% trans "Your Dashboard" %}
+            </h1>
+            <p class="mt-1 text-base text-slate-600">
+                {% trans "Welcome back," %} <span class="font-semibold">{{ request.user.get_full_name|default:request.user.get_username }}</span>! {% trans "Manage your articles below." %}
+            </p>
+        </div>
+        <div class="flex-shrink-0">
+            <a href="{% url 'blog:addarticle' %}" class="inline-flex items-center gap-x-2 rounded-md bg-sky-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-sky-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-600 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="h-5 w-5">
+                    <path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" />
+                </svg>
+                {% trans "Add New Article" %}
+            </a>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="mt-8">
+        <div class="bg-white rounded-xl shadow-md">
+            {% if articles %}
+            <!-- Articles Table -->
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm text-left">
+                    <thead class="bg-slate-50 text-xs text-slate-500 uppercase tracking-wider">
+                        <tr>
+                            <th scope="col" class="px-6 py-3">{% trans "Title" %}</th>
+                            <th scope="col" class="px-6 py-3 hidden md:table-cell">{% trans "Category" %}</th>
+                            <th scope="col" class="px-6 py-3 hidden sm:table-cell">{% trans "Published" %}</th>
+                            <th scope="col" class="px-6 py-3 text-right">{% trans "Actions" %}</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-200">
+                        {% for article in articles %}
+                        <tr class="hover:bg-slate-50">
+                            <td class="px-6 py-4">
+                                <a href="{{ article.get_absolute_url }}" class="font-medium text-slate-800 hover:text-sky-600 transition-colors">
+                                    {{ article.title }}
+                                </a>
+                            </td>
+                            <td class="px-6 py-4 text-slate-600 hidden md:table-cell">{{ article.category }}</td>
+                            <td class="px-6 py-4 text-slate-600 hidden sm:table-cell">{{ article.publish.date }}</td>
+                            <td class="px-6 py-4">
+                                <div class="flex items-center justify-end space-x-3">
+                                    <a href="{% url 'blog:update' article.slug %}" class="font-semibold text-sky-600 hover:text-sky-800">{% trans "Edit" %}</a>
+                                    <span class="text-slate-300">|</span>
+                                    <a href="{% url 'blog:delete' article.slug %}" class="font-semibold text-red-600 hover:text-red-800">{% trans "Delete" %}</a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <!-- Empty State -->
+            <div class="text-center py-16 px-6">
+                <svg class="mx-auto h-12 w-12 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                    <path vector-effect="non-scaling-stroke" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
+                </svg>
+                <h3 class="mt-2 text-lg font-semibold text-slate-900">{% trans "No Articles Yet" %}</h3>
+                <p class="mt-1 text-sm text-slate-500">{% trans "Ready to share something new? Get started by creating your first article." %}</p>
+                <div class="mt-6">
+                    <a href="{% url 'blog:addarticle' %}" class="inline-flex items-center rounded-md bg-sky-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-sky-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-sky-600">
+                        {% trans "Create First Article" %}
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </main>
+</div>
+{% else %}
+    <!-- Professional Access Denied Message -->
+    <div class="mx-auto max-w-xl text-center py-16 px-4">
+        <h2 class="text-2xl font-bold text-slate-800">{% trans "Access Denied" %}</h2>
+        <p class="mt-2 text-slate-600">{% trans "Please log in to view your dashboard." %}</p>
+        <div class="mt-6">
+            <a href="{% url 'users:login' %}" class="inline-block rounded-md bg-sky-600 px-5 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-sky-700 transition-colors">
+                {% trans "Log In" %}
+            </a>
+        </div>
+    </div>
+{% endif %}
+{% endblock %}

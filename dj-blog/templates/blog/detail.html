@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block page_title %}
+    {{ article.title }} - My Awesome Blog
+{% endblock page_title %}
+
+{% block meta_description %}
+    {{ article.snippet|truncatewords:25 }}
+{% endblock meta_description %}
+
+{% block meta_keywords %}
+    {{ article.title }}{% if article.tags.all %}, {% for tag in article.tags.all %}{{ tag.name }}{% if not forloop.last %}, {% endif %}{% endfor %}{% endif %}
+{% endblock meta_keywords %}
+
+{% block content %}
+<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
+    <div class="grid grid-cols-1 lg:grid-cols-3 lg:gap-x-12">
+
+        <!-- Main Article Content (Left Column) -->
+        <main class="lg:col-span-2">
+            <div class="bg-white rounded-xl shadow-md p-6 sm:p-8">
+                
+                <!-- Article Header -->
+                <header class="pb-6 border-b border-slate-200">
+                    <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-900 mb-4">{{ article.title }}</h1>
+                    
+                    <!-- Author & Meta Info -->
+                    <div class="flex items-center">
+                        <img class="h-12 w-12 rounded-full" src="https://ui-avatars.com/api/?name={{ article.author.get_username|slice:':1' }}&background=random" alt="{{ article.author.get_username }}">
+                        <div class="ml-4">
+                            <p class="text-base font-semibold text-slate-900">{{ article.author.get_full_name|default:article.author.get_username }}</p>
+                            <div class="flex space-x-2 text-sm text-slate-500">
+                                <time datetime="{{ article.publish|date:'Y-m-d' }}">Published on {{ article.publish.date }}</time>
+                            </div>
+                        </div>
+                    </div>
+                </header>
+
+                <!-- Featured Image -->
+                <div class="my-8">
+                    <img src="{{ article.image.url }}" alt="{{ article.title }}" class="w-full rounded-lg shadow-lg">
+                </div>
+
+                <!-- Article Body with Prose for beautiful typography -->
+                <article class="prose prose-slate max-w-none prose-a:text-sky-600 prose-a:no-underline hover:prose-a:underline">
+                    {{ article.content|safe }}
+                </article>
+
+                <!-- Tags and Like Button -->
+                <footer class="mt-8 pt-6 border-t border-slate-200 flex flex-wrap items-center justify-between gap-4">
+                    <!-- Tags -->
+                    <div class="flex flex-wrap gap-2">
+                        {% for tag in article.tags.all %}
+                        <a href="{% url 'blog:tagged' tag.slug %}" class="inline-block bg-slate-100 text-slate-700 text-sm font-medium px-3 py-1.5 rounded-full hover:bg-slate-200 transition-colors">
+                            #{{ tag.name }}
+                        </a>
+                        {% endfor %}
+                    </div>
+                    <!-- Like Button -->
+                    <form action="{% url 'blog:article_like' article.slug %}" method="POST">
+                        {% csrf_token %}
+                        <button type="submit" name="article_slug" value="{{ article.slug }}" class="flex items-center gap-2 text-sm font-semibold text-slate-600 bg-slate-100 rounded-full px-4 py-2 hover:bg-red-100 hover:text-red-600 transition-all duration-200">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd" /></svg>
+                            <span>{{ article.total_likes }}</span>
+                        </button>
+                    </form>
+                </footer>
+            </div>
+
+            <!-- Comments Section -->
+            <section class="mt-8 bg-white rounded-xl shadow-md p-6 sm:p-8">
+                <!-- Add Comment Form -->
+                <div>
+                    <h2 class="text-2xl font-bold text-slate-800 mb-4">Leave a Comment</h2>
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="space-y-4">
+                            {% for field in comment_form %}
+                                <div>
+                                    <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-slate-700 mb-1">{{ field.label }}</label>
+                                    {{ field }}
+                                    {% if field.errors %}
+                                        <p class="text-sm text-red-600 mt-1">{{ field.errors|first }}</p>
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+                        </div>
+                        <button type="submit" class="mt-6 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-sky-600 hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500">
+                            Post Comment
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Existing Comments -->
+                <div class="mt-12">
+                    <h2 class="text-2xl font-bold text-slate-800 mb-6">
+                        {% trans "Comments" %} ({{ comments.count }})
+                    </h2>
+                    <div class="space-y-8">
+                        {% for comment in comments %}
+                        <div class="flex space-x-4">
+                            <img class="h-10 w-10 rounded-full" src="https://ui-avatars.com/api/?name={{ comment.user.get_username|slice:':1' }}&background=random" alt="">
+                            <div class="flex-1">
+                                <div class="flex items-center justify-between">
+                                    <div>
+                                        <p class="text-sm font-medium text-slate-900">{{ comment.user.get_full_name|default:comment.user.get_username }}</p>
+                                        <p class="text-xs text-slate-500">{{ comment.created_at|timesince }} ago</p>
+                                    </div>
+                                    <div class="text-xs">
+                                        {% if user.is_authenticated and comment.user == user or user.is_staff %}
+                                            <a href="{% url 'blog:edit_comment' comment_id=comment.id %}" class="font-medium text-sky-600 hover:text-sky-800">Edit</a>
+                                            <a href="{% url 'blog:delete_comment' comment_id=comment.id %}" class="ml-2 font-medium text-red-600 hover:text-red-800">Delete</a>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <p class="mt-2 text-base text-slate-700">{{ comment.body|linebreaksbr }}</p>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <p class="text-slate-500">No comments yet. Be the first to share your thoughts!</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            </section>
+        </main>
+        
+        <!-- Sidebar (Right Column) -->
+        <aside class="hidden lg:block lg:col-span-1 mt-8 lg:mt-0">
+            <div class="sticky top-24 space-y-8">
+                <div class="bg-white rounded-xl shadow-md p-6">
+                    <h3 class="text-xl font-bold text-slate-800 mb-4">Similar Articles</h3>
+                    <div class="space-y-4">
+                        {% for similar in similar_posts %}
+                        <a href="{{ similar.get_absolute_url }}" class="group block">
+                            <div class="flex items-center space-x-4">
+                                <img src="{{ similar.image.url }}" alt="{{ similar.title }}" class="h-16 w-16 rounded-lg object-cover flex-shrink-0">
+                                <div>
+                                    <p class="text-sm font-semibold text-slate-800 group-hover:text-sky-600 transition-colors">{{ similar.title }}</p>
+                                    <p class="text-xs text-slate-500">{{ similar.publish.date }}</p>
+                                </div>
+                            </div>
+                        </a>
+                        {% empty %}
+                        <p class="text-sm text-slate-500">No similar posts found.</p>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+    </div>
+</div>
+{% endblock %}
