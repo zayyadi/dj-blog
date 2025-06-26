@@ -23,4 +23,7 @@ urlpatterns = [
     # Comment URLs
     path("comment/<int:comment_id>/edit/", views.edit_comment, name="edit_comment"),
     path("comment/<int:comment_id>/delete/", views.delete_comment, name="delete_comment"),
+    path('approval/queue/', views.draft_list, name='draft_list'),
+    path('approval/view/<slug:slug>/', views.draft_detail, name='draft_detail'),
+    path('approval/approve/<slug:slug>/', views.approve_article, name='approve_article'),
 ]

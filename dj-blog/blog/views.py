@@ -9,6 +9,7 @@ from django.shortcuts import (
     redirect,
     render,
 )  # noqa: F401
+from django.contrib.auth.decorators import user_passes_test
 from django.template.defaultfilters import slugify
 from taggit.models import Tag
 from django.http import HttpResponseForbidden
@@ -18,6 +19,13 @@ from blog.search import search
 from .models import Article, Category, Comment # Added Comment model
 
 from .forms import ArticleForm, CommentForm, CategoryForm
+
+
+def is_superuser(user):
+    """
+    Custom user pass test to check if the user is a superuser.
+    """
+    return user.is_superuser
 
 
 @login_required
@@ -104,7 +112,8 @@ def addArticle(request):
 def detail(request, post):
     # article = Article.objects.filter(id = id).first()
     article = get_object_or_404(Article, slug=post, status="published")
-    comments = article.comments.all()
+    comments = article.comments.all() # MPTT handles ordering
+    comment_form = CommentForm()
     # page = request.GET.get("page", 1)
 
     # paginator = Paginator(allcomments, 10)
@@ -120,15 +129,22 @@ def detail(request, post):
         "-same_tags", "-publish"
     )[:3]
 
-    if request.method == "POST":
-        form = CommentForm(request.POST)
-        if form.is_valid():
-            comment = form.save(commit=False)
-            comment.user = request.user
-            comment.post = article
-            comment.save()
-            messages.success(request, "Your comment has been added.")
-            return redirect("blog:detail", post=post)
+    comment_form = CommentForm(request.POST)
+    if comment_form.is_valid():
+        new_comment = comment_form.save(commit=False)
+        new_comment.post = article
+        new_comment.user = request.user
+        
+        # Check for a parent ID in the submitted form
+        parent_id = comment_form.cleaned_data.get('parent_id')
+        if parent_id:
+            # Find the parent comment and assign it
+            parent_comment = get_object_or_404(Comment, id=parent_id)
+            new_comment.parent = parent_comment
+
+        new_comment.save()
+        messages.success(request, 'Your comment has been posted.')
+        return redirect(article.get_absolute_url())
     else:
         form = CommentForm()
 
@@ -263,3 +279,47 @@ def delete_comment(request, comment_id):
         return redirect("blog:detail", post=post_slug)
 
     return render(request, "blog/delete_comment_confirm.html", {"comment": comment})
+
+
+@user_passes_test(is_superuser)
+def draft_list(request):
+    """
+    Displays a list of all articles with 'draft' status for superuser approval.
+    """
+    # FIXED: Use the string "draft" to filter
+    drafts = Article.objects.filter(status="draft").order_by('-publish') # Using 'publish' since 'created_at' doesn't exist on your model
+    context = {
+        'drafts': drafts
+    }
+    return render(request, 'approval/draft_list.html', context)
+
+@user_passes_test(is_superuser)
+def draft_detail(request, slug):
+    """
+    Shows a single draft article to the superuser for review.
+    """
+    # FIXED: Use the string "draft" to filter
+    article = get_object_or_404(Article, slug=slug, status="draft")
+    context = {
+        'article': article
+    }
+    return render(request, 'approval/draft_detail.html', context)
+
+@user_passes_test(is_superuser)
+def approve_article(request, slug):
+    """
+    Handles the approval of an article. This view only accepts POST requests.
+    """
+    if request.method == 'POST':
+        # FIXED: Use the string "draft" to get the object
+        article = get_object_or_404(Article, slug=slug, status="draft")
+        
+        # FIXED: Use the string "published" to update the status
+        article.status = "published"
+        article.save() 
+        
+        messages.success(request, f'The article "{article.title}" has been approved and published.')
+        return redirect('blog:draft_list')
+    
+    # Redirect if accessed via GET
+    return redirect('blog:draft_detail', slug=slug)

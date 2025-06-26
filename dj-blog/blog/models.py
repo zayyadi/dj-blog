@@ -9,13 +9,15 @@ from django.urls import reverse
 from django.utils import timezone
 from blog.search import update_index
 from core.settings import AUTH_USER_MODEL as User
+from mptt.models import MPTTModel, TreeForeignKey
+from django.conf import settings
 
 from django_summernote.fields import SummernoteTextField
 
 # from mptt.models import MPTTModel, TreeForeignKey
 from taggit.managers import TaggableManager
 
-from django.db.models.signals import post_save, post_migrate
+from django.db.models.signals import post_save
 
 
 # class CustomUser(AbstractUser):
@@ -101,15 +103,31 @@ class Article(models.Model):
         return super(Article, self).save(*args, **kwargs)
 
 
-class Comment(models.Model):
+class Comment(MPTTModel): # Inherit from MPTTModel
     post = models.ForeignKey(Article, on_delete=models.CASCADE, related_name="comments")
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    
+    # This is the new field that creates the hierarchy
+    parent = TreeForeignKey(
+        'self', 
+        on_delete=models.CASCADE, 
+        null=True, 
+        blank=True, 
+        related_name='replies'
+    )
+    
     body = models.TextField()
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
     created_at = models.DateTimeField(auto_now_add=True)
 
-    def __str__(self):
-        return f"Comment {self.body} by {self.user}"
+    class MPTTMeta:
+        # Sort comments by their creation date
+        order_insertion_by = ['created_at']
 
+    def __str__(self):
+        # A more descriptive string representation for threaded comments
+        if self.parent:
+            return f'Reply to {self.parent.user.get_username()} by {self.user.get_username()}'
+        return f'Comment by {self.user.get_username()} on {self.post.title}'
 
 LIKE_CHOICES = (
     ("Like", "Like"),

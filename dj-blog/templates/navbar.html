@@ -35,6 +35,11 @@
                             <a href="{% url 'users:logout' %}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-slate-100" role="menuitem" tabindex="-1">{% trans "Sign out" %}</a>
                         </div>
                     </div>
+                    {% if user.is_superuser %}
+                        <a href="{% url 'blog:draft_list' %}" class="block px-4 py-2 text-sm text-red-600 font-semibold hover:bg-slate-100" role="menuitem" tabindex="-1">
+                            {% trans "Approval Queue" %}
+                        </a>
+                    {% endif %}
                 {% else %}
                     <!-- Unauthenticated Links (Desktop) -->
                     <div class="hidden md:flex items-center space-x-2">

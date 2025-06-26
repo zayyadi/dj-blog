@@ -1,17 +1,12 @@
 {% extends "base.html" %}
 {% load i18n %}
+{% load mptt_tags %}
+{% load crispy_forms_tags %}
+{% load blog_extras %}  {# Make sure this is loaded #}
 
-{% block page_title %}
-    {{ article.title }} - My Awesome Blog
-{% endblock page_title %}
-
-{% block meta_description %}
-    {{ article.snippet|truncatewords:25 }}
-{% endblock meta_description %}
-
-{% block meta_keywords %}
-    {{ article.title }}{% if article.tags.all %}, {% for tag in article.tags.all %}{{ tag.name }}{% if not forloop.last %}, {% endif %}{% endfor %}{% endif %}
-{% endblock meta_keywords %}
+{% block page_title %}{{ article.title }} - My Awesome Blog{% endblock page_title %}
+{% block meta_description %}{{ article.snippet|truncatewords:25 }}{% endblock meta_description %}
+{% block meta_keywords %}{{ article.title }}{% if article.tags.all %}, {% for tag in article.tags.all %}{{ tag.name }}{% if not forloop.last %}, {% endif %}{% endfor %}{% endif %}{% endblock meta_keywords %}
 
 {% block content %}
 <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
@@ -24,10 +19,8 @@
                 <!-- Article Header -->
                 <header class="pb-6 border-b border-slate-200">
                     <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-900 mb-4">{{ article.title }}</h1>
-                    
-                    <!-- Author & Meta Info -->
                     <div class="flex items-center">
-                        <img class="h-12 w-12 rounded-full" src="https://ui-avatars.com/api/?name={{ article.author.get_username|slice:':1' }}&background=random" alt="{{ article.author.get_username }}">
+                        <img class="h-12 w-12 rounded-full object-cover" src="{{ article.author.profile.profile_picture.url }}" alt="{{ article.author.get_username }}">
                         <div class="ml-4">
                             <p class="text-base font-semibold text-slate-900">{{ article.author.get_full_name|default:article.author.get_username }}</p>
                             <div class="flex space-x-2 text-sm text-slate-500">
@@ -42,22 +35,18 @@
                     <img src="{{ article.image.url }}" alt="{{ article.title }}" class="w-full rounded-lg shadow-lg">
                 </div>
 
-                <!-- Article Body with Prose for beautiful typography -->
-                <article class="prose prose-slate max-w-none prose-a:text-sky-600 prose-a:no-underline hover:prose-a:underline">
+                <!-- Article Body -->
+                <article class="prose prose-slate max-w-none prose-a:text-sky-600">
                     {{ article.content|safe }}
                 </article>
 
-                <!-- Tags and Like Button -->
+                <!-- Footer: Tags and Like Button -->
                 <footer class="mt-8 pt-6 border-t border-slate-200 flex flex-wrap items-center justify-between gap-4">
-                    <!-- Tags -->
                     <div class="flex flex-wrap gap-2">
                         {% for tag in article.tags.all %}
-                        <a href="{% url 'blog:tagged' tag.slug %}" class="inline-block bg-slate-100 text-slate-700 text-sm font-medium px-3 py-1.5 rounded-full hover:bg-slate-200 transition-colors">
-                            #{{ tag.name }}
-                        </a>
+                        <a href="{% url 'blog:tagged' tag.slug %}" class="inline-block bg-slate-100 text-slate-700 text-sm font-medium px-3 py-1.5 rounded-full hover:bg-slate-200 transition-colors">#{{ tag.name }}</a>
                         {% endfor %}
                     </div>
-                    <!-- Like Button -->
                     <form action="{% url 'blog:article_like' article.slug %}" method="POST">
                         {% csrf_token %}
                         <button type="submit" name="article_slug" value="{{ article.slug }}" class="flex items-center gap-2 text-sm font-semibold text-slate-600 bg-slate-100 rounded-full px-4 py-2 hover:bg-red-100 hover:text-red-600 transition-all duration-200">
@@ -70,57 +59,51 @@
 
             <!-- Comments Section -->
             <section class="mt-8 bg-white rounded-xl shadow-md p-6 sm:p-8">
-                <!-- Add Comment Form -->
-                <div>
-                    <h2 class="text-2xl font-bold text-slate-800 mb-4">Leave a Comment</h2>
+                <div id="main-comment-form">
+                    <h2 class="text-2xl font-bold text-slate-800 mb-4">{% trans "Leave a Comment" %}</h2>
                     <form method="post">
                         {% csrf_token %}
-                        <div class="space-y-4">
-                            {% for field in comment_form %}
-                                <div>
-                                    <label for="{{ field.id_for_label }}" class="block text-sm font-medium text-slate-700 mb-1">{{ field.label }}</label>
-                                    {{ field }}
-                                    {% if field.errors %}
-                                        <p class="text-sm text-red-600 mt-1">{{ field.errors|first }}</p>
-                                    {% endif %}
-                                </div>
-                            {% endfor %}
-                        </div>
-                        <button type="submit" class="mt-6 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-sky-600 hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500">
-                            Post Comment
-                        </button>
+                        {{ comment_form|crispy }}
+                        <button type="submit" class="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-sky-600 hover:bg-sky-700">{% trans "Post Comment" %}</button>
                     </form>
                 </div>
 
-                <!-- Existing Comments -->
                 <div class="mt-12">
-                    <h2 class="text-2xl font-bold text-slate-800 mb-6">
-                        {% trans "Comments" %} ({{ comments.count }})
-                    </h2>
-                    <div class="space-y-8">
-                        {% for comment in comments %}
-                        <div class="flex space-x-4">
-                            <img class="h-10 w-10 rounded-full" src="https://ui-avatars.com/api/?name={{ comment.user.get_username|slice:':1' }}&background=random" alt="">
-                            <div class="flex-1">
-                                <div class="flex items-center justify-between">
-                                    <div>
-                                        <p class="text-sm font-medium text-slate-900">{{ comment.user.get_full_name|default:comment.user.get_username }}</p>
-                                        <p class="text-xs text-slate-500">{{ comment.created_at|timesince }} ago</p>
-                                    </div>
-                                    <div class="text-xs">
-                                        {% if user.is_authenticated and comment.user == user or user.is_staff %}
-                                            <a href="{% url 'blog:edit_comment' comment_id=comment.id %}" class="font-medium text-sky-600 hover:text-sky-800">Edit</a>
-                                            <a href="{% url 'blog:delete_comment' comment_id=comment.id %}" class="ml-2 font-medium text-red-600 hover:text-red-800">Delete</a>
-                                        {% endif %}
+                    <h2 class="text-2xl font-bold text-slate-800 mb-6">{% trans "Comments" %} ({{ comments.count }})</h2>
+                    
+                    {# --- THE FIX IS HERE: Use {% if %} instead of {% empty %} --- #}
+                    {% if comments %}
+                        <div class="space-y-6">
+                            {% recursetree comments %}
+                                {% with "ml-0 ml-8 ml-16 ml-24 ml-32" as margins %} {# Added more margin levels #}
+                                <div id="comment-{{ node.id }}" class="flex space-x-4 {{ margins|split|get_digit:node.level }}">
+                                    <img class="h-10 w-10 rounded-full flex-shrink-0 mt-1 object-cover" src="{{ node.user.profile.profile_picture.url }}" alt="{{ node.user.get_username }}">
+                                    <div class="flex-1">
+                                        <div class="bg-slate-50 rounded-lg p-4">
+                                            <div class="flex items-center justify-between flex-wrap gap-2">
+                                                <p class="text-sm font-medium text-slate-900">{{ node.user.get_full_name|default:node.user.get_username }}</p>
+                                                <p class="text-xs text-slate-500">{{ node.created_at|timesince }} ago</p>
+                                            </div>
+                                            <p class="mt-2 text-base text-slate-700">{{ node.body|linebreaksbr }}</p>
+                                        </div>
+                                        <div class="mt-2 flex items-center space-x-4">
+                                            <button class="reply-btn text-xs font-semibold text-slate-500 hover:text-sky-600" data-comment-id="{{ node.id }}">{% trans "Reply" %}</button>
+                                        </div>
+                                        <div id="reply-form-container-{{ node.id }}" class="mt-4"></div>
                                     </div>
                                 </div>
-                                <p class="mt-2 text-base text-slate-700">{{ comment.body|linebreaksbr }}</p>
-                            </div>
+                                {% endwith %}
+
+                                {% if not node.is_leaf_node %}
+                                    <div class="children space-y-6">
+                                        {{ children }}
+                                    </div>
+                                {% endif %}
+                            {% endrecursetree %}
                         </div>
-                        {% empty %}
-                        <p class="text-slate-500">No comments yet. Be the first to share your thoughts!</p>
-                        {% endfor %}
-                    </div>
+                    {% else %}
+                        <p class="text-slate-500">{% trans "No comments yet. Be the first to share your thoughts!" %}</p>
+                    {% endif %}
                 </div>
             </section>
         </main>
@@ -129,7 +112,7 @@
         <aside class="hidden lg:block lg:col-span-1 mt-8 lg:mt-0">
             <div class="sticky top-24 space-y-8">
                 <div class="bg-white rounded-xl shadow-md p-6">
-                    <h3 class="text-xl font-bold text-slate-800 mb-4">Similar Articles</h3>
+                    <h3 class="text-xl font-bold text-slate-800 mb-4">{% trans "Similar Articles" %}</h3>
                     <div class="space-y-4">
                         {% for similar in similar_posts %}
                         <a href="{{ similar.get_absolute_url }}" class="group block">
@@ -142,7 +125,7 @@
                             </div>
                         </a>
                         {% empty %}
-                        <p class="text-sm text-slate-500">No similar posts found.</p>
+                        <p class="text-sm text-slate-500">{% trans "No similar posts found." %}</p>
                         {% endfor %}
                     </div>
                 </div>
@@ -151,4 +134,93 @@
 
     </div>
 </div>
-{% endblock %}
+
+<!-- This is a hidden template for the reply form -->
+<div id="reply-form-template" style="display: none;">
+    <form method="post" class="reply-form">
+        {% csrf_token %}
+        <div class="crispy-form-container">
+            {{ comment_form.body }}
+            <input type="hidden" name="parent_id" value="">
+        </div>
+        <div class="mt-2 flex items-center space-x-2">
+            <button type="submit" class="px-3 py-1.5 border border-transparent text-xs font-medium rounded-md shadow-sm text-white bg-sky-600 hover:bg-sky-700">{% trans "Post Reply" %}</button>
+            <button type="button" class="cancel-reply-btn px-3 py-1.5 border border-slate-300 text-xs font-medium rounded-md text-slate-700 bg-white hover:bg-slate-50">{% trans "Cancel" %}</button>
+        </div>
+    </form>
+</div>
+{% endblock content %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const replyFormTemplate = document.getElementById('reply-form-template');
+    if (!replyFormTemplate) {
+        console.error('Reply form template not found!');
+        return;
+    }
+
+    const replyButtons = document.querySelectorAll('.reply-btn');
+
+    replyButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+
+            const commentId = this.dataset.commentId;
+            const container = document.getElementById(`reply-form-container-${commentId}`);
+
+            // Check if the form is already open in the container we just clicked
+            const isFormAlreadyOpenHere = container.querySelector('.reply-form');
+
+            // --- The Core Logic ---
+            // 1. Always remove any existing reply forms from the page.
+            document.querySelectorAll('.reply-form-container').forEach(c => {
+                c.innerHTML = '';
+            });
+
+            // 2. If the form was NOT already open where we clicked, it means we want to open it now.
+            if (!isFormAlreadyOpenHere) {
+                // Clone the template's form element
+                const formClone = replyFormTemplate.firstElementChild.cloneNode(true);
+                
+                // Set the parent_id for the submission
+                formClone.querySelector('input[name="parent_id"]').value = commentId;
+                
+                // Add the new form to the correct container
+                container.appendChild(formClone);
+                
+                // Focus the textarea for a better user experience
+                container.querySelector('textarea').focus();
+
+                // Add a 'cancel' listener specifically to the new form
+                container.querySelector('.cancel-reply-btn').addEventListener('click', function() {
+                    container.innerHTML = ''; // Just clear this container
+                });
+            }
+            // If the form *was* already open here, the code above has already closed it,
+            // and this block is skipped, resulting in a perfect "toggle off" effect.
+        });
+    });
+});
+</script>
+
+<style>
+/* This style block remains the same and is still necessary */
+.crispy-form-container textarea {
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid #cbd5e1; /* slate-300 */
+    border-radius: 0.375rem; /* rounded-md */
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    color: #334155; /* slate-700 */
+    transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+.crispy-form-container textarea:focus {
+    outline: 2px solid transparent;
+    outline-offset: 2px;
+    border-color: #0ea5e9; /* sky-500 */
+    box-shadow: 0 0 0 1px #0ea5e9;
+}
+</style>
+{% endblock extra_scripts %}

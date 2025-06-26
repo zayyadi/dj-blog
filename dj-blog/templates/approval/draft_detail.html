@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block page_title %}{% trans "Review:" %} {{ article.title }}{% endblock %}
+
+{% block content %}
+<!-- This is the admin action bar -->
+<div class="bg-yellow-100 border-b-2 border-yellow-300 py-3">
+    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex items-center justify-between">
+        <div class="text-sm font-semibold text-yellow-800">
+            <span class="font-bold">{% trans "ADMIN REVIEW MODE" %}:</span> {% trans "This is a draft article." %}
+        </div>
+        <div class="flex items-center gap-4">
+            <a href="{% url 'blog:draft_list' %}" class="text-sm font-medium text-slate-600 hover:text-slate-900">← {% trans "Back to Queue" %}</a>
+            <form action="{% url 'blog:approve_article' article.slug %}" method="POST">
+                {% csrf_token %}
+                <button type="submit" class="rounded-md bg-green-600 px-3 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-green-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-green-600">
+                    {% trans "Approve & Publish" %}
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- This section is a copy of your public article detail page for accurate preview -->
+<div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
+    <div class="grid grid-cols-1">
+        <main>
+            <div class="bg-white rounded-xl shadow-md p-6 sm:p-8">
+                <header class="pb-6 border-b border-slate-200">
+                    <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-slate-900 mb-4">{{ article.title }}</h1>
+                    <div class="flex items-center">
+                        <img class="h-12 w-12 rounded-full" src="{{ article.author.profile.profile_picture.url }}" alt="{{ article.author.get_username }}">
+                        <div class="ml-4">
+                            <p class="text-base font-semibold text-slate-900">{{ article.author.get_full_name|default:article.author.get_username }}</p>
+                            <div class="flex space-x-2 text-sm text-slate-500">
+                                <span>{% trans "Submitted on" %} {{ article.created_at|date:"F d, Y" }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </header>
+
+                <div class="my-8">
+                    <img src="{{ article.image.url }}" alt="{{ article.title }}" class="w-full rounded-lg shadow-lg">
+                </div>
+
+                <article class="prose prose-slate max-w-none prose-a:text-sky-600">
+                    {{ article.content|safe }}
+                </article>
+            </div>
+        </main>
+    </div>
+</div>
+{% endblock %}

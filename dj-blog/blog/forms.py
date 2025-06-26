@@ -99,11 +99,15 @@ class CategoryForm(forms.ModelForm):
 
 
 class CommentForm(forms.ModelForm):
+    # Add this new hidden field for the parent ID
+    parent_id = forms.IntegerField(widget=forms.HiddenInput(), required=False)
+
     class Meta:
         model = Comment
-        fields = ("body",)
+        fields = ('body', 'parent_id') # Add parent_id here
+        # Optional: Add a widget for the body textarea if you want
         widgets = {
-            "content": forms.Textarea(attrs={"placeholder": "Add a comment..."}),
+            'body': forms.Textarea(attrs={'rows': 4, 'placeholder': 'Write your comment here...'}),
         }
 
 
